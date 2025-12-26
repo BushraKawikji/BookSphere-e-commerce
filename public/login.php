@@ -1,29 +1,6 @@
 <?php
-
-require_once '../config/db.php';
-
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-
-    $email = trim($_POST['email']);
-    $password = $_POST['password'];
-
-    if (!empty($email) && !empty($password)) {
-        $stmt = $conn->prepare("SELECT pass FROM users where email = ?");
-        $stmt->bind_param('s', $email);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        $row = $result->fetch_assoc();
-        if ($result->num_rows === 1) {
-            if ($password === $row['pass']) {
-                echo "Valid Authentication";
-            } else {
-                echo "Email or Password Wrong";
-            }
-        } else {
-            echo "Email doesn't exist";
-        }
-    }
-}
+// variables:
+$formAction = '../actions/auth/login_process.php';
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -49,7 +26,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <div class="card-body">
                         <h3 class="text-center mb-4">Sign In</h3>
 
-                        <form action="<?= $_SERVER['PHP_SELF'] ?>" method="POST" id="loginForm">
+                        <form action="<?= $formAction ?>" method="POST" id="loginForm">
                             <div class="mb-3">
                                 <label class="form-label">Email Address</label>
                                 <input type="email" class="form-control" name="email" id="loginEmail">

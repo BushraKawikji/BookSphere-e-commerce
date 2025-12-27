@@ -48,10 +48,10 @@
                                 <div class="form-group">
                                     <label>category</label>
                                     <select class="form-control" name="category_id">
-                                        <option value="1">1 - RINGS</option>
-                                        <option value="2">2 - NECKLACES</option>
-                                        <option value="3">3 - EARRINGS</option>
-                                        <option value="4">4 - BRACELETS</option>
+                                        <option value="1">testtttttt</option>
+                                        <option value="2">testtttttt</option>
+                                        <option value="3">testtttttt</option>
+                                        <option value="4">testtttttt</option>
                                     </select>
                                 </div>
 

@@ -25,12 +25,12 @@
                             <form action="#" method="post">
                                 <div class="form-group">
                                     <label>product name</label>
-                                    <input type="text" class="form-control" name="product_name" value="Dextera bangle" readonly>
+                                    <input type="text" class="form-control" name="product_name" value="........" readonly>
                                 </div>
 
                                 <div class="form-group">
                                     <label>Original product price</label>
-                                    <input type="text" class="form-control" name="original_price" value="JD80" readonly>
+                                    <input type="text" class="form-control" name="original_price" value="JD00" readonly>
                                 </div>
 
                                 <div class="form-group">

@@ -30,7 +30,7 @@
 
                                 <div class="form-group">
                                     <label>Category Name</label>
-                                    <input type="text" class="form-control" name="name" value="RINGS">
+                                    <input type="text" class="form-control" name="name" value="......">
                                 </div>
 
                                 <div class="form-group">

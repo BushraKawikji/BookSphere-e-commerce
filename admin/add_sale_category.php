@@ -25,7 +25,7 @@
                             <form action="#" method="post">
                                 <div class="form-group">
                                     <label>Category Name</label>
-                                    <input type="text" class="form-control" name="category_name" value="RINGS" readonly>
+                                    <input type="text" class="form-control" name="category_name" value="....." readonly>
                                 </div>
 
                                 <div class="form-group">

@@ -1,3 +1,24 @@
+<?php
+session_start();
+require_once __DIR__ . '/../helpers/db_queries.php';
+
+// Check if user is logged in
+if (!isset($_SESSION['user_id'])) {
+    header("Location: login.php");
+    exit();
+}
+
+$user_id = $_SESSION['user_id'];
+
+// Get user's orders
+$sqlOrders = "SELECT order_id, total_amount, status, created_at 
+              FROM orders 
+              WHERE user_id = ? 
+              ORDER BY created_at DESC";
+
+$resultOrders = selectQuery($conn, $sqlOrders, "i", [$user_id]);
+
+?>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -35,6 +56,15 @@
 
     <div class="container my-4">
 
+        <!-- Success Messages -->
+        <?php if (isset($_SESSION['success_message'])): ?>
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <?= htmlspecialchars($_SESSION['success_message']) ?>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            <?php unset($_SESSION['success_message']); ?>
+        <?php endif; ?>
+
         <div class="d-flex justify-content-between align-items-center mb-3">
             <div>
                 <h3 class="mb-0">My Orders</h3>
@@ -45,74 +75,60 @@
             </a>
         </div>
 
-        <div class="card shadow-sm">
-            <div class="card-body">
+        <?php if ($resultOrders->num_rows > 0): ?>
+            <div class="card shadow-sm">
+                <div class="card-body">
 
-                <div class="table-responsive">
-                    <table class="table align-middle mb-0">
-                        <thead>
-                            <tr>
-                                <th>Order #</th>
-                                <th>Date</th>
-                                <th>Status</th>
-                                <th>Total</th>
-                                <th class="text-end">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
+                    <div class="table-responsive">
+                        <table class="table align-middle mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Order #</th>
+                                    <th>Date</th>
+                                    <th>Status</th>
+                                    <th>Total</th>
+                                    <th class="text-end">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php while ($order = $resultOrders->fetch_assoc()):
+                                    // Determine badge color based on status
+                                    $badgeClass = 'bg-secondary';
+                                    if ($order['status'] === 'Pending') $badgeClass = 'bg-warning';
+                                    elseif ($order['status'] === 'Processing') $badgeClass = 'bg-info';
+                                    elseif ($order['status'] === 'Shipped') $badgeClass = 'bg-primary';
+                                    elseif ($order['status'] === 'Delivered') $badgeClass = 'bg-success';
+                                    elseif ($order['status'] === 'Cancelled') $badgeClass = 'bg-danger';
+                                ?>
+                                    <tr>
+                                        <td><strong>#<?= $order['order_id'] ?></strong></td>
+                                        <td><?= date('M d, Y', strtotime($order['created_at'])) ?></td>
+                                        <td><span class="badge <?= $badgeClass ?>"><?= htmlspecialchars($order['status']) ?></span></td>
+                                        <td>$<?= number_format($order['total_amount'], 2) ?></td>
+                                        <td class="text-end">
+                                            <a href="order_details.php?order_id=<?= $order['order_id'] ?>"
+                                                class="btn btn-sm btn-outline-primary">
+                                                View Details
+                                            </a>
+                                        </td>
+                                    </tr>
+                                <?php endwhile; ?>
+                            </tbody>
+                        </table>
+                    </div>
 
-                            <tr>
-                                <td><strong>#1001</strong></td>
-                                <td>2025-12-25</td>
-                                <td><span class="badge bg-warning">Pending</span></td>
-                                <td>$35.00</td>
-                                <td class="text-end">
-                                    <a href="order_details.php" class="btn btn-sm btn-outline-primary">
-                                        View
-                                    </a>
-                                </td>
-                            </tr>
-
-                            <tr>
-                                <td><strong>#1000</strong></td>
-                                <td>2025-12-20</td>
-                                <td><span class="badge bg-success">Shipped</span></td>
-                                <td>$54.50</td>
-                                <td class="text-end">
-                                    <a href="order_details.php" class="btn btn-sm btn-outline-primary">
-                                        View
-                                    </a>
-                                </td>
-                            </tr>
-
-                            <tr>
-                                <td><strong>#999</strong></td>
-                                <td>2025-12-10</td>
-                                <td><span class="badge bg-secondary">Delivered</span></td>
-                                <td>$19.99</td>
-                                <td class="text-end">
-                                    <a href="order_details.php" class="btn btn-sm btn-outline-primary">
-                                        View
-                                    </a>
-                                </td>
-                            </tr>
-
-                        </tbody>
-                    </table>
                 </div>
-
             </div>
-        </div>
-
-        <!-- Empty state (keep for later if no orders) -->
-        <!--
-    <div class="text-center py-5">
-      <i class="lni lni-package fs-1 text-muted"></i>
-      <h5 class="mt-2">No orders yet</h5>
-      <p class="text-muted">Start shopping to place your first order.</p>
-      <a href="shop.php" class="btn btn-primary">Go to Shop</a>
-    </div>
-    -->
+        <?php else: ?>
+            <div class="card shadow-sm">
+                <div class="card-body text-center py-5">
+                    <i class="lni lni-package" style="font-size: 4rem; color: #ccc;"></i>
+                    <h5 class="mt-3">No orders yet</h5>
+                    <p class="text-muted">Start shopping to place your first order.</p>
+                    <a href="shop.php" class="btn btn-primary">Go to Shop</a>
+                </div>
+            </div>
+        <?php endif; ?>
 
     </div>
 

@@ -8,12 +8,13 @@ $category = $_GET['category'] ?? '';
 $sortBy = $_GET['sort'] ?? '';
 
 // Build query dynamically
-$sql = "SELECT books.book_id, books.book_name, books.price, authors.author_name, categories.name as category_name 
-        FROM books 
-        LEFT JOIN book_author ON books.book_id = book_author.book_id 
-        LEFT JOIN authors ON authors.author_id = book_author.author_id
-        LEFT JOIN book_category ON books.book_id = book_category.book_id
-        LEFT JOIN categories ON categories.category_id = book_category.category_id
+$sql = "SELECT b.book_id, b.book_name, b.price, b.stock, a.author_name, c.name as category_name, i.image_path
+        FROM Books b
+        LEFT JOIN Book_Author ba ON b.book_id = ba.book_id 
+        LEFT JOIN Authors a ON a.author_id = ba.author_id
+        LEFT JOIN Book_Category bc ON b.book_id = bc.book_id
+        LEFT JOIN Categories c ON c.category_id = bc.category_id
+        LEFT JOIN Images i ON b.book_id = i.book_id AND i.is_main = 1
         WHERE 1=1";
 
 $params = [];
@@ -21,14 +22,14 @@ $types = "";
 
 // Add search filter
 if (!empty($searchBar)) {
-    $sql .= " AND books.book_name LIKE ?";
+    $sql .= " AND b.book_name LIKE ?";
     $params[] = "%$searchBar%";
     $types .= "s";
 }
 
 // Add category filter
 if (!empty($category) && $category !== 'All Categories') {
-    $sql .= " AND categories.name = ?";
+    $sql .= " AND c.name = ?";
     $params[] = $category;
     $types .= "s";
 }
@@ -36,16 +37,16 @@ if (!empty($category) && $category !== 'All Categories') {
 // Add sorting
 switch ($sortBy) {
     case 'price_low':
-        $sql .= " ORDER BY books.price ASC";
+        $sql .= " ORDER BY b.price ASC";
         break;
     case 'price_high':
-        $sql .= " ORDER BY books.price DESC";
+        $sql .= " ORDER BY b.price DESC";
         break;
-    case 'top_rated':
-        $sql .= " ORDER BY books.rating DESC";
+    case 'name_asc':
+        $sql .= " ORDER BY b.book_name ASC";
         break;
     default:
-        $sql .= " ORDER BY books.book_id DESC";
+        $sql .= " ORDER BY b.book_id DESC";
 }
 
 // Execute query
@@ -56,7 +57,7 @@ if (!empty($params)) {
 }
 
 // Get categories for dropdown
-$sqlCat = "SELECT name FROM categories";
+$sqlCat = "SELECT name FROM Categories";
 $resultCat = selectQuery($conn, $sqlCat);
 
 ?>
@@ -152,7 +153,7 @@ $resultCat = selectQuery($conn, $sqlCat);
                                 <option value="">Sort By</option>
                                 <option value="price_low" <?= $sortBy === 'price_low' ? 'selected' : '' ?>>Price: Low to High</option>
                                 <option value="price_high" <?= $sortBy === 'price_high' ? 'selected' : '' ?>>Price: High to Low</option>
-                                <option value="top_rated" <?= $sortBy === 'top_rated' ? 'selected' : '' ?>>Top Rated</option>
+                                <option value="name_asc" <?= $sortBy === 'name_asc' ? 'selected' : '' ?>>Name: A-Z</option>
                             </select>
                         </div>
                     </div>
@@ -169,22 +170,39 @@ $resultCat = selectQuery($conn, $sqlCat);
                     <div class="col-lg-3 col-md-4 col-6">
                         <div class="card shadow-sm h-100">
                             <div class="card-body">
-                                <div class="bg-light rounded mb-3" style="height:160px;"></div>
+                                <?php if (!empty($row['image_path'])): ?>
+                                    <img src="<?= htmlspecialchars($row['image_path']) ?>" 
+                                         alt="Book cover" 
+                                         class="rounded mb-3 w-100" 
+                                         style="height:200px;object-fit:cover;">
+                                <?php else: ?>
+                                    <div class="bg-light rounded mb-3" style="height:200px;"></div>
+                                <?php endif; ?>
 
                                 <h6 class="mb-1"><?= htmlspecialchars($row['book_name']) ?></h6>
                                 <small class="text-muted d-block mb-2"><?= htmlspecialchars($row['author_name'] ?? 'Unknown') ?></small>
 
                                 <div class="d-flex justify-content-between align-items-center mb-2">
-                                    <strong>$<?= htmlspecialchars($row['price']) ?></strong>
-                                    <span class="badge bg-success">-10%</span>
+                                    <strong class="text-primary">$<?= number_format($row['price'], 2) ?></strong>
+                                    <?php if ($row['stock'] > 0): ?>
+                                        <span class="badge bg-success">In Stock</span>
+                                    <?php else: ?>
+                                        <span class="badge bg-danger">Out of Stock</span>
+                                    <?php endif; ?>
                                 </div>
 
                                 <div class="d-flex gap-2">
                                     <a href="product.php?book_id=<?= $row['book_id'] ?>" class="btn btn-sm btn-outline-primary w-100">View</a>
-                                    <form method="POST" action="cart.php" style="width: 100%;">
-                                        <input type="hidden" name="book_id" value="<?= $row['book_id'] ?>">
-                                        <button type="submit" class="btn btn-sm btn-primary w-100">Add</button>
-                                    </form>
+                                    <?php if ($row['stock'] > 0): ?>
+                                        <form method="POST" action="cart.php" style="width: 100%;">
+                                            <input type="hidden" name="book_id" value="<?= $row['book_id'] ?>">
+                                            <button type="submit" class="btn btn-sm btn-primary w-100">
+                                                <i class="lni lni-cart"></i> Add
+                                            </button>
+                                        </form>
+                                    <?php else: ?>
+                                        <button class="btn btn-sm btn-secondary w-100" disabled>Out of Stock</button>
+                                    <?php endif; ?>
                                 </div>
 
                             </div>

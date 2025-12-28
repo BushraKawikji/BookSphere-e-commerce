@@ -10,37 +10,38 @@ if (!isset($_SESSION['user_id'])) {
 
 $user_id = $_SESSION['user_id'];
 
-if (isset($_GET['book_id'])) {
-    $book_id = (int)$_GET['book_id'];
+// Handle Add to Cart from shop.php
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['book_id'])) {
+    $book_id = (int)$_POST['book_id'];
 
     if ($book_id > 0) {
-
-        $sqlCheck = "SELECT cart_id, quantity FROM cart WHERE user_id = ? AND book_id = ? LIMIT 1";
+        // Check if book already in cart (UNIQUE constraint handles this)
+        $sqlCheck = "SELECT cart_id, quantity FROM Cart WHERE user_id = ? AND book_id = ? LIMIT 1";
         $resultCheck = selectQuery($conn, $sqlCheck, "ii", [$user_id, $book_id]);
 
         if ($resultCheck && $resultCheck->num_rows > 0) {
+            // Update quantity
             $row = $resultCheck->fetch_assoc();
             $newQty = (int)$row['quantity'] + 1;
 
-            $sqlUpdate = "UPDATE cart SET quantity = ? WHERE cart_id = ? AND user_id = ?";
+            $sqlUpdate = "UPDATE Cart SET quantity = ? WHERE cart_id = ? AND user_id = ?";
             executeQuery($conn, $sqlUpdate, "iii", [$newQty, (int)$row['cart_id'], $user_id]);
         } else {
-            // Not in cart -> insert new row
-            $sqlInsert = "INSERT INTO cart (user_id, book_id, quantity) VALUES (?, ?, 1)";
+            // Insert new cart item
+            $sqlInsert = "INSERT INTO Cart (user_id, book_id, quantity) VALUES (?, ?, 1)";
             executeQuery($conn, $sqlInsert, "ii", [$user_id, $book_id]);
         }
 
         $_SESSION['success_message'] = "Book added to cart!";
     }
 
-    // Important: remove book_id from URL after adding
     header("Location: cart.php");
     exit();
 }
 
 // Handle Clear Cart
 if (isset($_POST['clearBtn'])) {
-    $sqlClear = "DELETE FROM cart WHERE user_id = ?";
+    $sqlClear = "DELETE FROM Cart WHERE user_id = ?";
     $result = executeQuery($conn, $sqlClear, "i", [$user_id]);
     if ($result) {
         $_SESSION['success_message'] = "Cart cleared successfully!";
@@ -52,7 +53,7 @@ if (isset($_POST['clearBtn'])) {
 // Handle Delete Single Item
 if (isset($_POST['deleteItem'])) {
     $cart_id = (int)$_POST['cart_id'];
-    $sqlDelete = "DELETE FROM cart WHERE cart_id = ? AND user_id = ?";
+    $sqlDelete = "DELETE FROM Cart WHERE cart_id = ? AND user_id = ?";
     $result = executeQuery($conn, $sqlDelete, "ii", [$cart_id, $user_id]);
     if ($result) {
         $_SESSION['success_message'] = "Item removed from cart!";
@@ -68,7 +69,7 @@ if (isset($_POST['updateCart'])) {
             $cart_id = (int)$cart_id;
             $quantity = (int)$quantity;
             if ($quantity > 0) {
-                $sqlUpdate = "UPDATE cart SET quantity = ? WHERE cart_id = ? AND user_id = ?";
+                $sqlUpdate = "UPDATE Cart SET quantity = ? WHERE cart_id = ? AND user_id = ?";
                 executeQuery($conn, $sqlUpdate, "iii", [$quantity, $cart_id, $user_id]);
             }
         }
@@ -78,13 +79,15 @@ if (isset($_POST['updateCart'])) {
     }
 }
 
-// Get Cart Items
-$sqlCart = "SELECT cart.cart_id, cart.quantity, books.book_id, books.book_name, books.price, authors.author_name 
-            FROM cart 
-            JOIN books ON cart.book_id = books.book_id
-            LEFT JOIN book_author ON books.book_id = book_author.book_id
-            LEFT JOIN authors ON authors.author_id = book_author.author_id
-            WHERE cart.user_id = ?";
+// Get Cart Items with book details
+$sqlCart = "SELECT c.cart_id, c.quantity, b.book_id, b.book_name, b.price, 
+            a.author_name, i.image_path
+            FROM Cart c
+            JOIN Books b ON c.book_id = b.book_id
+            LEFT JOIN Book_Author ba ON b.book_id = ba.book_id
+            LEFT JOIN Authors a ON a.author_id = ba.author_id
+            LEFT JOIN Images i ON b.book_id = i.book_id AND i.is_main = 1
+            WHERE c.user_id = ?";
 
 $resultCart = selectQuery($conn, $sqlCart, "i", [$user_id]);
 
@@ -98,7 +101,7 @@ if ($resultCart->num_rows > 0) {
     }
 }
 
-$shipping = 0; // Free shipping
+$shipping = 0;
 $total = $subtotal + $shipping;
 
 ?>
@@ -179,7 +182,14 @@ $total = $subtotal + $shipping;
                                                 <tr>
                                                     <td>
                                                         <div class="d-flex gap-3 align-items-center">
-                                                            <div class="bg-light rounded" style="width:60px;height:80px;"></div>
+                                                            <?php if (!empty($item['image_path'])): ?>
+                                                                <img src="<?= htmlspecialchars($item['image_path']) ?>" 
+                                                                     alt="Book cover" 
+                                                                     style="width:60px;height:80px;object-fit:cover;" 
+                                                                     class="rounded">
+                                                            <?php else: ?>
+                                                                <div class="bg-light rounded" style="width:60px;height:80px;"></div>
+                                                            <?php endif; ?>
                                                             <div>
                                                                 <strong><?= htmlspecialchars($item['book_name']) ?></strong>
                                                                 <div class="text-muted small"><?= htmlspecialchars($item['author_name'] ?? 'Unknown') ?></div>

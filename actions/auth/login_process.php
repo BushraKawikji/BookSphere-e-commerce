@@ -22,8 +22,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $_SESSION['name']    = $row['name'];
                 $_SESSION['role']    = $row['role'];
 
-                header("Location: ../../public/shop.php");
-                exit;
+                if ($row['role'] === 'user') {
+                    header("Location: ../../public/shop.php");
+                } elseif ($row['role'] === 'admin') {
+                    header("Location: ../../admin/index.php");
+                }
             } else {
                 echo "Email or Password Wrong";
             }

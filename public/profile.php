@@ -21,14 +21,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['updateProfile'])) {
     $email = trim($_POST['email']);
     $phone = trim($_POST['phone']);
     $address = trim($_POST['address']);
-    
+
     // Validation
     if (empty($name) || empty($email) || empty($phone)) {
         $_SESSION['error_message'] = "Name, email, and phone are required!";
     } else {
         $sqlUpdate = "UPDATE users SET name = ?, email = ?, phone = ?, address = ? WHERE user_id = ?";
         $result = executeQuery($conn, $sqlUpdate, "ssssi", [$name, $email, $phone, $address, $user_id]);
-        
+
         if ($result) {
             $_SESSION['success_message'] = "Profile updated successfully!";
             header("Location: profile.php");
@@ -44,7 +44,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['changePassword'])) {
     $currentPassword = $_POST['current_password'];
     $newPassword = $_POST['new_password'];
     $confirmPassword = $_POST['confirm_password'];
-    
+
     // Verify current password (field name is 'pass' in database)
     if (password_verify($currentPassword, $user['pass'])) {
         if ($newPassword === $confirmPassword) {
@@ -52,7 +52,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['changePassword'])) {
                 $hashedPassword = password_hash($newPassword, PASSWORD_DEFAULT);
                 $sqlUpdatePwd = "UPDATE users SET pass = ? WHERE user_id = ?";
                 $result = executeQuery($conn, $sqlUpdatePwd, "si", [$hashedPassword, $user_id]);
-                
+
                 if ($result) {
                     $_SESSION['success_message'] = "Password changed successfully!";
                     header("Location: profile.php");
@@ -135,80 +135,48 @@ $totalSpent = $resultTotalSpent->fetch_assoc()['total'] ?? 0;
             <?php unset($_SESSION['error_message']); ?>
         <?php endif; ?>
 
-        <h3 class="mb-4">My Account</h3>
 
         <div class="row g-4">
-            <!-- Profile Info -->
             <div class="col-lg-8">
-                <!-- User Statistics -->
-                <div class="row g-3 mb-4">
-                    <div class="col-md-4">
-                        <div class="card shadow-sm text-center">
-                            <div class="card-body">
-                                <i class="lni lni-package fs-2 text-primary"></i>
-                                <h4 class="mt-2 mb-0"><?= $orderCount ?></h4>
-                                <small class="text-muted">Total Orders</small>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="card shadow-sm text-center">
-                            <div class="card-body">
-                                <i class="lni lni-dollar fs-2 text-success"></i>
-                                <h4 class="mt-2 mb-0">$<?= number_format($totalSpent, 2) ?></h4>
-                                <small class="text-muted">Total Spent</small>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="card shadow-sm text-center">
-                            <div class="card-body">
-                                <i class="lni lni-calendar fs-2 text-info"></i>
-                                <h4 class="mt-2 mb-0"><?= date('M Y', strtotime($user['created_at'])) ?></h4>
-                                <small class="text-muted">Member Since</small>
-                            </div>
-                        </div>
-                    </div>
-                </div>
 
                 <!-- Edit Profile -->
                 <div class="card shadow-sm mb-4">
                     <div class="card-body">
                         <h5 class="mb-3">Personal Information</h5>
-                        
+
                         <form method="POST" action="profile.php">
                             <div class="row g-3">
                                 <div class="col-md-6">
                                     <label class="form-label">Full Name *</label>
-                                    <input type="text" class="form-control" name="name" 
-                                           value="<?= htmlspecialchars($user['name']) ?>" required>
+                                    <input type="text" class="form-control" name="name"
+                                        value="<?= htmlspecialchars($user['name']) ?>" required>
                                 </div>
-                                
+
                                 <div class="col-md-6">
                                     <label class="form-label">Email *</label>
-                                    <input type="email" class="form-control" name="email" 
-                                           value="<?= htmlspecialchars($user['email']) ?>" required>
+                                    <input type="email" class="form-control" name="email"
+                                        value="<?= htmlspecialchars($user['email']) ?>" required>
                                 </div>
-                                
+
                                 <div class="col-md-6">
                                     <label class="form-label">Phone *</label>
-                                    <input type="tel" class="form-control" name="phone" 
-                                           value="<?= htmlspecialchars($user['phone']) ?>" required>
+                                    <input type="tel" class="form-control" name="phone"
+                                        value="<?= htmlspecialchars($user['phone']) ?>" required>
                                 </div>
 
                                 <div class="col-md-6">
                                     <label class="form-label">Role</label>
-                                    <input type="text" class="form-control" 
-                                           value="<?= htmlspecialchars(ucfirst($user['role'])) ?>" disabled>
+                                    <input type="text" class="form-control"
+                                        value="<?= htmlspecialchars(ucfirst($user['role'])) ?>" disabled>
                                 </div>
 
                                 <div class="col-12">
                                     <label class="form-label">Address</label>
-                                    <textarea class="form-control" name="address" rows="2" 
-                                              placeholder="Enter your address..."><?= htmlspecialchars($user['address'] ?? '') ?></textarea>
+                                    <textarea class="form-control" name="address" rows="2"
+                                        placeholder="Enter your address..."><?= htmlspecialchars($user['address'] ?? '') ?></textarea>
                                 </div>
                             </div>
-                            
+
                             <div class="mt-3">
                                 <button type="submit" name="updateProfile" class="btn btn-primary">
                                     <i class="lni lni-save"></i> Update Profile
@@ -222,28 +190,28 @@ $totalSpent = $resultTotalSpent->fetch_assoc()['total'] ?? 0;
                 <div class="card shadow-sm">
                     <div class="card-body">
                         <h5 class="mb-3">Change Password</h5>
-                        
+
                         <form method="POST" action="profile.php">
                             <div class="row g-3">
                                 <div class="col-12">
                                     <label class="form-label">Current Password</label>
                                     <input type="password" class="form-control" name="current_password" required>
                                 </div>
-                                
+
                                 <div class="col-md-6">
                                     <label class="form-label">New Password</label>
-                                    <input type="password" class="form-control" name="new_password" 
-                                           minlength="6" required>
+                                    <input type="password" class="form-control" name="new_password"
+                                        minlength="6" required>
                                     <small class="text-muted">Minimum 6 characters</small>
                                 </div>
-                                
+
                                 <div class="col-md-6">
                                     <label class="form-label">Confirm New Password</label>
-                                    <input type="password" class="form-control" name="confirm_password" 
-                                           minlength="6" required>
+                                    <input type="password" class="form-control" name="confirm_password"
+                                        minlength="6" required>
                                 </div>
                             </div>
-                            
+
                             <div class="mt-3">
                                 <button type="submit" name="changePassword" class="btn btn-warning">
                                     <i class="lni lni-lock"></i> Change Password
@@ -259,7 +227,7 @@ $totalSpent = $resultTotalSpent->fetch_assoc()['total'] ?? 0;
                 <div class="card shadow-sm">
                     <div class="card-body">
                         <h5 class="mb-3">Quick Links</h5>
-                        
+
                         <div class="d-grid gap-2">
                             <a href="orders.php" class="btn btn-outline-primary">
                                 <i class="lni lni-package me-2"></i> My Orders
@@ -273,35 +241,6 @@ $totalSpent = $resultTotalSpent->fetch_assoc()['total'] ?? 0;
                             <a href="shop.php" class="btn btn-outline-primary">
                                 <i class="lni lni-shopping-basket me-2"></i> Continue Shopping
                             </a>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Account Info -->
-                <div class="card shadow-sm mt-3">
-                    <div class="card-body">
-                        <h6 class="mb-3">Account Details</h6>
-                        
-                        <div class="mb-2">
-                            <small class="text-muted d-block">User ID</small>
-                            <strong>#<?= $user['user_id'] ?></strong>
-                        </div>
-                        
-                        <div class="mb-2">
-                            <small class="text-muted d-block">Account Type</small>
-                            <span class="badge <?= $user['role'] === 'admin' ? 'bg-danger' : 'bg-primary' ?>">
-                                <?= ucfirst($user['role']) ?>
-                            </span>
-                        </div>
-                        
-                        <div class="mb-2">
-                            <small class="text-muted d-block">Account Status</small>
-                            <span class="badge bg-success">Active</span>
-                        </div>
-                        
-                        <div class="mb-0">
-                            <small class="text-muted d-block">Member Since</small>
-                            <strong><?= date('M d, Y', strtotime($user['created_at'])) ?></strong>
                         </div>
                     </div>
                 </div>

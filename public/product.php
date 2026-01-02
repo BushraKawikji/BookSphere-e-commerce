@@ -46,8 +46,8 @@ $sqlAvg = "SELECT COUNT(rating) as num, AVG(rating) AS avg FROM Reviews WHERE bo
 $resultAvg = selectQuery($conn, $sqlAvg, "i", [$book_id]);
 $avgRow = $resultAvg->fetch_assoc();
 
-$avgRating = (float)($avgRow['avg'] ?? 0);
-$starsFilled = (int) round($avgRating);
+$avgRating = $avgRow['avg'] ?? 0;
+$starsFilled = round($avgRating);
 $numOfReviews = $avgRow['num'];
 
 // Handle Add to Cart
@@ -147,9 +147,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['addToCart'])) {
                     <div class="card-body">
                         <?php if (!empty($rowBook['image_path'])):
                             $image = str_replace(' ', '%20', $rowBook['image_path']);
-                            // $image = ltrim($image, '/');
                         ?>
-                            <img src="<?= '../admin/' . $image ?>"
+                            <img src="<?= $rowBook['image_path'] ?>"
                                 alt="Book cover"
                                 class="w-100 rounded"
                                 style="height:450px;object-fit:cover;">
@@ -167,7 +166,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['addToCart'])) {
                 <div class="card shadow-sm">
                     <div class="card-body">
                         <h3 class="mb-1"><?= htmlspecialchars($rowBook['book_name']) ?></h3>
-                        <p class="text-muted mb-2">by <strong><?= htmlspecialchars($rowBook['author_name'] ?? 'Unknown') ?></strong></p>
+                        <p class="text-muted mb-2">by <strong><?= htmlspecialchars($rowBook['author_name']) ?></strong></p>
 
                         <!-- Rating -->
                         <div class="d-flex align-items-center gap-2 mb-3">
@@ -269,7 +268,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['addToCart'])) {
                     <div class="border rounded p-3 mb-3">
                         <div class="d-flex justify-content-between mb-2">
                             <strong><?= htmlspecialchars($rowReview['name']) ?></strong>
-                            <small class="text-muted"><?= date('M d, Y', strtotime($rowReview['created_at'])) ?></small>
+                            <small class="text-muted"><?= $rowReview['created_at'] ?></small>
                         </div>
                         <div class="mb-2">
                             <?php for ($i = 0; $i < $rowReview['rating']; $i++): ?>

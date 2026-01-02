@@ -2,7 +2,6 @@
 session_start();
 require_once __DIR__ . '/../helpers/db_queries.php';
 
-// Check if user is logged in
 if (!isset($_SESSION['user_id'])) {
     header("Location: login.php");
     exit();
@@ -10,12 +9,10 @@ if (!isset($_SESSION['user_id'])) {
 
 $user_id = $_SESSION['user_id'];
 
-// Handle Add to Cart from shop.php
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['book_id'])) {
     $book_id = (int)$_POST['book_id'];
 
     if ($book_id > 0) {
-        // Check if book already in cart (UNIQUE constraint handles this)
         $sqlCheck = "SELECT cart_id, quantity FROM Cart WHERE user_id = ? AND book_id = ? LIMIT 1";
         $resultCheck = selectQuery($conn, $sqlCheck, "ii", [$user_id, $book_id]);
 
@@ -181,10 +178,10 @@ $total = $subtotal + $shipping;
                                                     <td>
                                                         <div class="d-flex gap-3 align-items-center">
                                                             <?php if (!empty($item['image_path'])):
-                                                                $image = str_replace(' ', '%20', $item['image_path']);
+                                                                // $image = str_replace(' ', '%20', $item['image_path']);
 
                                                             ?>
-                                                                <img src="<?= '../admin/' . $image ?>"
+                                                                <img src="<?= $item['image_path'] ?>"
                                                                     alt="Book cover"
                                                                     style="width:60px;height:80px;object-fit:cover;"
                                                                     class="rounded">

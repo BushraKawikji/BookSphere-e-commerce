@@ -4,7 +4,6 @@ require_once __DIR__ . '/../helpers/db_queries.php';
 
 // Check if user is logged in
 $isLoggedIn = isset($_SESSION['user_id']);
-$userName = $isLoggedIn ? $_SESSION['user_name'] ?? 'User' : 'Guest';
 
 // Get books
 $sqlBooks = "SELECT b.book_id, b.book_name, b.price, b.stock, 
@@ -228,7 +227,7 @@ $resultBooks = selectQuery($conn, $sqlBooks);
                                     <!-- Book Image -->
                                     <div class="position-relative mb-3" style="height: 250px; overflow: hidden; border-radius: 10px;">
                                         <?php if (!empty($book['image_path'])): ?>
-                                            <img src="<?= htmlspecialchars( $book['image_path']) ?>"
+                                            <img src="<?= htmlspecialchars($book['image_path']) ?>"
                                                 alt="<?= htmlspecialchars($book['book_name']) ?>"
                                                 class="w-100 h-100"
                                                 style="object-fit: cover;">

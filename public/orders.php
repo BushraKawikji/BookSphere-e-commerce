@@ -109,7 +109,7 @@ $resultOrders = selectQuery($conn, $sqlOrders, "i", [$user_id]);
                                     <tr>
                                         <td><strong>#<?= $counter ?></strong></td>
 
-                                        <td><?= date('M d, Y', strtotime($order['created_at'])) ?></td>
+                                        <td><?= $order['created_at'] ?></td>
 
                                         <td>
                                             <span class="badge <?= $badgeClass ?>">

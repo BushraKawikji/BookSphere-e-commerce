@@ -167,7 +167,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['placeOrder'])) {
                 <div class="d-flex gap-3 align-items-center">
                     <a href="shop.php" class="text-decoration-none">Shop</a>
                     <a href="profile.php" class="text-decoration-none">Account</a>
-                    <a href="wishlist.php" class="text-decoration-none"><i class="lni lni-heart"></i> Wishlist</a>
                     <a href="cart.php" class="text-decoration-none"><i class="lni lni-cart"></i> Cart</a>
                     <a href="orders.php" class="text-decoration-none">Orders</a>
                     <a href="logout.php" class="text-decoration-none text-danger">Logout</a>

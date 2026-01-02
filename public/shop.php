@@ -2,12 +2,21 @@
 session_start();
 require_once __DIR__ . '/../helpers/db_queries.php';
 
-// Get filter parameters
+// Variables
 $searchBar = trim($_GET['searchBar'] ?? '');
 $category = $_GET['category'] ?? '';
 $sortBy = $_GET['sort'] ?? '';
 
-// Build query dynamically
+// Query
+$sql = "SELECT * FROM books";
+$result = selectQuery($conn, $sql);
+while ($row = $result->num_rows > 0) {
+    echo $row['book_id'] . " | " . $row['book_name'];
+}
+
+
+
+// Queries
 $sql = "SELECT b.discount_percentage ,b.book_id, b.book_name, b.price, b.stock, a.author_name, c.name as category_name, i.image_path
         FROM Books b
         LEFT JOIN Book_Author ba ON b.book_id = ba.book_id 
@@ -20,14 +29,14 @@ $sql = "SELECT b.discount_percentage ,b.book_id, b.book_name, b.price, b.stock, 
 $params = [];
 $types = "";
 
-// Add search filter
+// Search
 if (!empty($searchBar)) {
     $sql .= " AND b.book_name LIKE ?";
     $params[] = "%$searchBar%";
     $types .= "s";
 }
 
-// Add category filter
+// category
 if (!empty($category) && $category !== 'All Categories') {
     $sql .= " AND c.name = ?";
     $params[] = $category;
@@ -162,7 +171,7 @@ $resultCat = selectQuery($conn, $sqlCat);
             <?php
             if ($result->num_rows > 0) {
                 while ($row = $result->fetch_assoc()) {
-                    $discount = (int)($row['discount_percentage'] ?? 0);
+                    $discount = ($row['discount_percentage'] ?? 0);
                     $finalPrice = $row['price'];
 
                     if ($discount > 0) {
@@ -177,7 +186,7 @@ $resultCat = selectQuery($conn, $sqlCat);
                                     $image = str_replace(' ', '%20', $row['image_path']);
 
                                 ?>
-                                    <img src="<?= '../admin/' . $image ?>"
+                                    <img src="<?= $row['image_path'] ?>"
                                         alt="Book cover"
                                         class="rounded mb-3 w-100"
                                         style="height:200px;object-fit:cover;">
@@ -186,7 +195,7 @@ $resultCat = selectQuery($conn, $sqlCat);
                                 <?php endif; ?>
 
                                 <h6 class="mb-1"><?= htmlspecialchars($row['book_name']) ?></h6>
-                                <small class="text-muted d-block mb-2"><?= htmlspecialchars($row['author_name'] ?? 'Unknown') ?></small>
+                                <small class="text-muted d-block mb-2"><?= htmlspecialchars($row['author_name']) ?></small>
 
                                 <div class="d-flex justify-content-between align-items-center mb-2">
                                     <div class="mb-2">

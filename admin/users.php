@@ -64,7 +64,7 @@ require_once 'includes/check_login.php';
                                             <th>User Name</th>
                                             <th>Email</th>
                                             <th>Role</th>
-                                            <th>Delete</th>
+                                            <!-- <th>Delete</th> -->
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -81,7 +81,7 @@ require_once 'includes/check_login.php';
                                             <td><?= htmlspecialchars($u['name']) ?></td>
                                             <td><?= htmlspecialchars($u['email']) ?></td>
                                             <td><?= htmlspecialchars($u['role']) ?></td>
-                                            <td><a href="#" class="text-primary"><i class="fas fa-trash-alt fa-lg"></i></a></td>
+                                            <!-- <td><a href="#" class="text-primary"><i class="fas fa-trash-alt fa-lg"></i></a></td> -->
                                         </tr>
                                     <?php endwhile; ?>
 

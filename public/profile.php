@@ -54,7 +54,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['changePassword'])) {
         } elseif (strlen($newPassword) < 6) {
             $_SESSION['error_message'] = "Password must be at least 6 characters!";
         } else {
-            // Hash the new password قبل التخزين
             $hashedPassword = password_hash($newPassword, PASSWORD_DEFAULT);
 
             $sqlUpdatePwd = "UPDATE users SET pass = ? WHERE user_id = ?";

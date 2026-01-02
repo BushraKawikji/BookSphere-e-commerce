@@ -7,15 +7,6 @@ $searchBar = trim($_GET['searchBar'] ?? '');
 $category = $_GET['category'] ?? '';
 $sortBy = $_GET['sort'] ?? '';
 
-// Query
-$sql = "SELECT * FROM books";
-$result = selectQuery($conn, $sql);
-while ($row = $result->num_rows > 0) {
-    echo $row['book_id'] . " | " . $row['book_name'];
-}
-
-
-
 // Queries
 $sql = "SELECT b.discount_percentage ,b.book_id, b.book_name, b.price, b.stock, a.author_name, c.name as category_name, i.image_path
         FROM Books b
